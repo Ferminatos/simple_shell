@@ -70,4 +70,24 @@ typedef struct liststr
  * @histcount: the hsitory line number count
  */
 
-
+typedef struct passinfo
+{
+	char *arg;
+	char **argv;
+	char *path;
+	int argc;
+	unsigned int line_count;
+	int err_num;
+	int linecount_flag;
+	char *fname;
+	list_t *env;
+	list_t *history;
+	list_t *alias;
+	char **environ;
+	int env_changed;
+	int status;
+	char **cmd_buf;
+	int cmd_buf_type;
+	int readfd;
+	int histcount;
+} info_t;
