@@ -1,14 +1,14 @@
 #include "shell.h"
 
 static int EXIT_CODE;
-static int no_init_exit_code = 1;
 
+static int no_init_exit_code = 1;
 
 /**
  * process_exit_code - Returns the address at which EXIT_CODE is stored
+ *
  * Return: Address of EXIT_CODE var
- */
-
+*/
 int *process_exit_code()
 {
 	if (no_init_exit_code)
@@ -23,8 +23,7 @@ int *process_exit_code()
 /**
  * set_process_exit_code - Sets the value for EXIT_CODE var
  * @code: Number representing exit code
- */
-
+*/
 void set_process_exit_code(int code)
 {
 	EXIT_CODE = code;
@@ -32,7 +31,8 @@ void set_process_exit_code(int code)
 
 /**
  * build_dynamic_environ - Builds the "env vars" array using dynamic memory
-*/
+ */
+
 void build_dynamic_environ(void)
 {
 	int count_envs = 0;
@@ -42,6 +42,7 @@ void build_dynamic_environ(void)
 		count_envs++;
 
 	new_environ = allocate_memory(sizeof(char *) * (count_envs + 1));
+
 	for (count_envs = 0;  __environ[count_envs] != NULL; count_envs++)
 		new_environ[count_envs] = duplicate_string(__environ[count_envs]);
 
@@ -54,6 +55,7 @@ void build_dynamic_environ(void)
 /**
  * free_dynamic_environ - Frees the memory allocated to hold "env vars"
  */
+
 void free_dynamic_environ(void)
 {
 	free_dbl_ptr(__environ);

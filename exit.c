@@ -20,6 +20,7 @@ int handle_exit(char *buff, char **cmds_list, char **commands)
 	/* Command is exit */
 	if (commands[1] == NULL)
 	{
+		write_history();
 		free_allocs(buff, cmds_list, commands, F_BUFF | F_CMDS);
 		if (*process_exit_code() == 127)
 			exit(2);
@@ -30,6 +31,7 @@ int handle_exit(char *buff, char **cmds_list, char **commands)
 	/* Command is exit status */
 	if (status >= 0)
 	{
+		write_history();
 		free_allocs(buff, cmds_list, commands, F_BUFF | F_CMDS);
 		exit(status);
 	}

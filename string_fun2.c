@@ -1,109 +1,109 @@
 #include "shell.h"
 
 /**
- * _strchr - string scanning operation
- * @s: string 1
- * @c: character to search
- * Return: return a pointer to the byte, or
- * a null pointer if the byte was not found.
+ * _strlen - returns the length of a string
+ * @s: array
+ * Return: length
  */
-char *_strchr(const char *s, int c)
+int _strlen(const char *s)
+{
+	int i = 0;
+
+	if (s == NULL)
+		return (0);
+
+	while (s[i])
+		i++;
+	return (i);
+}
+
+/**
+ * _strdup - copy a strings with a malloc
+ * @s1: array
+ * Return: pointer to the copy
+ */
+char *_strdup(const char *s1)
+{
+	char	*s2;
+	size_t	i;
+
+	i = 0;
+	s2 = (char *)malloc(sizeof(char) * _strlen(s1) + 1);
+	if (!s2)
+		return (NULL);
+	while (s1[i])
+	{
+		s2[i] = s1[i];
+		i++;
+	}
+	s2[i] = '\0';
+	return (s2);
+}
+
+/**
+ * _strncmp - compare if is equal 2 strings, first n chars
+ * @s1: string1
+ * @s2: string2
+ * @n: n first characters
+ * Return: 0 success; else pointer
+ */
+int	_strncmp(const char *s1, const char *s2, size_t n)
 {
 	size_t i;
 
 	i = 0;
-	while (s[i])
-	{
-		if (s[i] == c)
-			return ((char *)&s[i]);
+	while (i < n && s1 && s2 && s1[i] && s2[i] &&
+			(unsigned char)s1[i] == (unsigned char)s2[i])
 		i++;
-	}
-	if (c == '\0')
-		return ((char *)(&s[i]));
-	return (NULL);
+	if (i == n)
+		return (0);
+	return ((unsigned char)s1[i] - (unsigned char)s2[i]);
 }
 
 /**
- * _strcat - concatenate two strings
- * @s1: string 1
- * @s2: string 2
- * Return: return a pointer to the resulting string dest.
+ * _strcmp - compare if is equal 2 strings
+ * @s1: string1
+ * @s2: string2
+ * Return: 0 success; else pointer
  */
-char *_strcat(char *s1, const char *s2)
+int     _strcmp(const char *s1, const char *s2)
 {
-	return (_strncat(s1, s2, -1));
+		return (_strncmp(s1, s2, (size_t)-1));
 }
 
 /**
- * _strncat - concatenate first n chars of s2 to s1 string
- * @s1: string 1
- * @s2: string 2
- * @n: numbers of characters of s2 to concatenate to the s1
- * Return: return a pointer to the resulting string dest.
- */
-char *_strncat(char *s1, const char *s2, size_t n)
+ * num_to_str - Convert a number to string format
+ * @num: Number to be converted
+ *
+ * Return: Pointer to string representation of "num"
+*/
+char *num_to_str(int num)
 {
-	size_t i;
-	size_t j;
+	int num_rev = 0;
+	int i, digits = 0;
+	char *num_str = NULL;
 
-	i = _strlen(s1);
-	j = 0;
-	while (s2[j] && j < n)
-		s1[i++] = s2[j++];
-	s1[i] = '\0';
-	return (s1);
-}
+	if (num == 0)
+		digits = 1;
+	else
+		while (num > 0)
+		{
+			digits++;
+			num_rev *= 10;
+			num_rev += num % 10;
+			num /= 10;
+		}
 
-/**
- * _strcpy - Copies the string src to dest
- * @dest: Destiny pointer
- * @src: String source
- * Return: Pointer to dest
- */
+	num_str = malloc(sizeof(char) * (digits + 1));
+	if (num_str == NULL)
+		dispatch_error("Error: Coudn't allocate memory for number conversion");
 
-char *_strcpy(char *dest, char *src)
-{
-	char *mem_address;
-
-	mem_address = dest;
-
-	while (*src != '\0')
+	for (i = 0; i < digits; i++)
 	{
-		*mem_address = *src;
-		mem_address++;
-		src++;
+		num_str[i] = (num_rev % 10) + '0';
+		num_rev /= 10;
 	}
-	*mem_address = '\0';
+	num_str[i] = '\0';
 
-	return (dest);
-}
-
-
-/**
- * _strncpy - Copies n number chars of a string
- * @dest: String to wich chars are going to be copied
- * @src: String to be copied
- * @n: Num of chars to copy from src
- * Return: Pointer to dest
- */
-
-char *_strncpy(char *dest, char *src, int n)
-{
-	int count = 0;
-	char *start = dest;
-
-
-	while (*src != '\0' && count < n)
-	{
-		*(start++) = *(src++);
-		count++;
-	}
-
-	while (count < n)
-	{
-		*(start++) = '\0';
-		count++;
-	}
-
-	return (dest);
+	return (num_str);
 }

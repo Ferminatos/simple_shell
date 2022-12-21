@@ -31,24 +31,26 @@ int main(int ac, char **av)
 		/* Print console symbol only if it is interactive*/
 		if (isatty(STDIN_FILENO) == 1 && exec_file == 0)
 			write(STDOUT_FILENO, "$ ", 2);
-		/* Read commands from console*/
+		/* Read commands from console */
+		/*read = read_line(fd, &buff);*/
 		read = getline(&buff, &buff_len, stdin);
 		if (read == EOF)
 		{
 			free(buff);
-			exit(127);
+			exit(*process_exit_code());
 		}
+		/*handle_history(buff);*/
 		/* Remove comments & '\n' char from buffer */
-		/*buff = handle_comment(buff);*/
-		strtok(buff, "\n");
+		buff = handle_comment(buff);
+		_strtok(buff, "\n");
 		/* Handling_semicolon, ||, && and executes inside of the function */
-		/*handling_semicolon_and_operators(buff, read, av[0]);*/
+		handling_semicolon_and_operators(buff, read, av[0]);
 	}
 	/* Free buffer memory */
 	free(buff);
 	if (exec_file)
 		close(fd);
-	return (127);
+	return (*process_exit_code());
 }
 
 /**
@@ -86,7 +88,7 @@ int handle_arguments(int ac, char **av, int *exec_file)
 /**
  * sigintHandler - Avoids current process to finish
  * @sig_num: Signal number
- */
+*/
 void sigintHandler(int __attribute__((unused))sig_num)
 {
 	write(STDIN_FILENO, "\n$ ", 3);
@@ -94,8 +96,9 @@ void sigintHandler(int __attribute__((unused))sig_num)
 
 /**
  * get_first_av - Returns the first argument passed to main
+ *
  * Return: Pointer to first arg passed to main
- */
+*/
 char *get_first_av(void)
 {
 	return (FIRST_ARG);

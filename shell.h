@@ -1,5 +1,5 @@
-#ifndef SHELL_H_
-#define SHELL_H_
+#ifndef __SHELL_H
+#define __SHELL_H
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -43,7 +43,13 @@ void free_list(list_t *head);
 
 char *get_first_av(void);
 
-int execute_commands(char *buff, char **cmds_list, char *cmd,int read, char *first_av);
+/*function with all the logical part that will work with the main */
+int execute_commands(char *buff, char **cmds_list, char *cmd,
+											int read, char *first_av);
+void handling_semicolon_and_operators(char *buff, int read, char *first_av);
+void handling_or(char *buff_semicolon, int read, char *first_av);
+int handling_and(char *buff_semicolon, int read,
+											char *first_av, int prev_flag);
 
 /* Special functions */
 void __attribute__((constructor)) build_dynamic_environ(void);
@@ -51,6 +57,8 @@ void __attribute__((destructor)) free_dynamic_environ(void);
 
 char *_getenv(char *name);
 
+/* replacement variables */
+void handle_var_replacement(char **commands);
 int *process_exit_code();
 void set_process_exit_code(int code);
 
@@ -58,12 +66,27 @@ void set_process_exit_code(int code);
 void env(void);
 int _setenv(char *name, char *value);
 int _unsetenv(char *name);
+int _cd(char *path);
+int _alias(char **commands);
 int _help(char **commands);
+int _history(void);
+/* helper global vars builtin functions */
+list_t **get_alias_head();
+list_t **get_history_addrss();
+list_t **get_last_cmd_addrss();
+void handle_history(char *buff);
+void free_history(void);
+void write_history(void);
+void update_count_lines(void);
+int *get_history_lines_count();
 
 /* builtins utils */
 int validate_env_name(char *name);
 int is_valid_env_var_name(char *name);
 int get_env_index(char *name);
+void set_alias(char *alias_pair);
+int is_set_alias(char *alias_pair);
+int handle_alias_args(char **commands, list_t **out_addrs);
 /* functions that is part of help */
 int read_line(const int fd, char **line);
 int f_read_line(char **str, char **line, int fd);
@@ -111,7 +134,7 @@ char *_strchr(const char *s, int c);
 char *_strcat(char *s1, const char *s2);
 char *_strncat(char *s1, const char *s2, size_t n);
 char *num_to_str(int num);
-int _strncmp(const char *s1, const char *s2, size_t n);
+int	_strncmp(const char *s1, const char *s2, size_t n);
 int _puts(char *str);
 
 /* f_strings_creations */
@@ -120,4 +143,4 @@ char *f_strsub(char const *s, unsigned int start, size_t len);
 void f_strdel(char **as);
 int _strcmp(const char *s1, const char *s2);
 
-#endif
+#endif /* __SHELL_H */

@@ -95,3 +95,86 @@ int _unsetenv(char *name)
 
 	return (1);
 }
+
+/**
+ * _cd - Changes the current directory of the process
+ * @path: Path to wich change the working directory
+ *
+ * Return: 1 on success, -1 on error
+*/
+int _cd(char *path)
+{
+	char buff[1024];
+	char *oldpwd;
+	char *_path = path;
+
+	if (_strcmp(path, "-") == 0)
+		path = _getenv("OLDPWD");
+
+	if (path == NULL)
+	{
+		print_builtin_error("cd: OLDPWD not set", "");
+		return (-1);
+	}
+	/* Needed to avoid reading on freed memory */
+	path = duplicate_string(path);
+	/* store this dir in case of update */
+	oldpwd = getcwd(buff, 1024);
+	if (oldpwd == NULL)
+	{
+		free(path);
+		print_builtin_error("cd: couldn't get current dir", "");
+		return (-1);
+	}
+	/* Try to change the current dir */
+	if (chdir(path) == -1)
+	{
+		free(path);
+		print_builtin_error("cd: can't change cd to ", _path);
+		set_process_exit_code(1);
+		return (-1);
+	}
+	/* Update env variables */
+	_setenv("OLDPWD", oldpwd);
+	_setenv("PWD", path);
+	free(path);
+	set_process_exit_code(0);
+	return (1);
+}
+
+/**
+ * _alias - Sets an alias command
+ * @commands: List of commands
+ *
+ * Return: -1 on error, 0 otherwise
+*/
+int _alias(char **commands)
+{
+	int status = 0;
+	list_t *curr;
+	list_t *out_head = NULL;
+	list_t **alias_addrs = get_alias_head();
+
+	/* the alias args starts from position 1 */
+	if (commands[1] == NULL)
+	{ /* This means to list all the aliases */
+		for (curr = *alias_addrs; curr != NULL; curr = curr->next)
+		{
+			_puts(curr->str);
+			_puts("\n");
+		}
+		set_process_exit_code(0);
+		return (1);
+	}
+	/* List aliases and sets the aliases that have the form name=value */
+	status = handle_alias_args(commands, &out_head);
+	/* print listed alias */
+	for (curr = out_head; curr != NULL; curr = curr->next)
+	{
+		_puts(curr->str);
+		_puts("\n");
+	}
+	/* free list */
+	free_list(out_head);
+	return (status);
+}

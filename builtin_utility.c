@@ -3,8 +3,9 @@
 /**
  * validate_env_name - Validates a env var name
  * @name: String to be validated
+ *
  * Return: 0, on success, -1 on error
- */
+*/
 
 int validate_env_name(char *name)
 {
@@ -26,14 +27,13 @@ int validate_env_name(char *name)
 /**
  * is_valid_env_var_name - Checks if the env name is valid
  * @name: String to be checked
+ *
  * Return: 1 if is valid, 0 otherwise
- */
-
+*/
 int is_valid_env_var_name(char *name)
 {
 	int i;
 	/* Verify that name is a valid env_var name (without "=") */
-
 	for (i = 0; name[i] != '\0'; i++)
 		if (name[i] == '=')
 			return (0);
@@ -44,9 +44,9 @@ int is_valid_env_var_name(char *name)
 /**
  * get_env_index - Check if a env variable exists and returns the index
  * @name: Name to be searched
+ *
  * Return: Index of the env var, -1 on error
- */
-
+*/
 int get_env_index(char *name)
 {
 	int i;
