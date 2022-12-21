@@ -67,7 +67,6 @@ int execute_commands(char *buff, char **cmds_list,
 	char **commands;
 	int child_pid, _err = 0, flag = 0, *status = process_exit_code();
 
-
 	/* Generate array of commands */
 	commands = parse_user_input(cmd, " ");
 	handle_var_replacement(commands);
@@ -83,7 +82,6 @@ int execute_commands(char *buff, char **cmds_list,
 	}
 	/* check if we can only run for positives */
 	child_pid = fork();/* Fork parent process to execute the command */
-
 	if (child_pid == -1)
 	{
 		free_allocs(buff, cmds_list, commands, F_BUFF | F_CMD_L | F_CMDS);
@@ -94,19 +92,15 @@ int execute_commands(char *buff, char **cmds_list,
 	{
 		_err = handle_PATH(commands);
 		execve(commands[0], commands, __environ);
-
 		if (_err != 0)
 			handle_cmd_not_found(buff, cmds_list, commands, first_av);
-
 		free_allocs(buff, cmds_list, commands, F_BUFF | F_CMD_L | F_CMDS);
 		dispatch_error(first_av);
 	}
 	wait(status);
 	*status = WEXITSTATUS(*status);
-
 	if (*status == 2)
 		set_process_exit_code(127);
-
 	free_dbl_ptr(commands);
 
 	return (flag);
