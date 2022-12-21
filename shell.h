@@ -1,108 +1,123 @@
-#ifndef _SHELL_H_
-#define _SHELL_H_
+#ifndef SHELL_H_
+#define SHELL_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/stat.h>
-#include <limits.h>
-#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
+#include <stddef.h>
+/* open */
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <signal.h>
 
-/* for read/write buffers */
-#define READ_BUF_SIZE 1024
-#define WRITE_BUF_SIZE 1024
-#define BUF_FLUSH -1
-
-/* for command chaining */
-#define CMD_NORM	0
-#define CMD_OR		1
-#define CMD_AND		2
-#define CMD_CHAIN	3
-
-/* for convert_number() */
-#define CONVERT_LOWERCASE	1
-#define CONVERT_UNSIGNED	2
-
-/* 1 if using system getline() */
-#define USE_GETLINE 0
-#define USE_STRTOK 0
-
-#define HIST_FILE	".simple_shell_history"
-#define HIST_MAX	4096
-
-extern char **environ;
+/* FLAGS */
+#define F_BUFF 1
+#define F_CMD_L 2
+#define F_CMDS 4
 
 /**
- * struct liststr - singly linked list
- * @num: the number field
- * @str: a string
+ * struct list_s - singly linked list
+ * @str: string - (malloc'ed string)
+ * @len: length of the string
  * @next: points to the next node
+ *
+ * Description: singly linked list node structure
+ * for Holberton project
  */
-
-typedef struct liststr
+typedef struct list_s
 {
-	int num;
 	char *str;
-	struct liststr *next;
-} list_t
+	unsigned int len;
+	struct list_s *next;
+} list_t;
 
-/**
- * struct passinfo - contains pseudo-arguements to pass into a function allowing uniform prototype for function pointer struct
- * @arg: a string generated from getline containing arguements
- * @argv: an aarray of strings generated from arg
- * @path: a string path for the current command
- * @argc: the argument count
- * @line_count: the error count
- * @err_num: the error code for exit()s
- * @linecount_flag: if on count this line of input
- * @fname: the program filename
- * @env: linked list local copy of environ
- * @history: the history node
- * @alias: the alias node
- * @env_changed: on if environ was changed
- * @status: the return status of the last executed command
- * @cmd_buf: address of pointer to cmd_buf
- * @cmd_buf_type: CMD_type ||, &&, ;
- * @histcount: the hsitory line number count
- */
+/*linked lists*/
+size_t print_list(const list_t *h);
+list_t *add_node_end(list_t **head, const char *str);
+void free_list(list_t *head);
 
-typedef struct passinfo
-{
-	char *arg;
-	char **argv;
-	char *path;
-	int argc;
-	unsigned int line_count;
-	int err_num;
-	int linecount_flag;
-	char *fname;
-	list_t *env;
-	list_t *history;
-	list_t *alias;
-	char **environ;
-	int env_changed;
-	int status;
-	char **cmd_buf;
-	int cmd_buf_type;
-	int readfd;
-	int histcount;
-} info_t;
+char *get_first_av(void);
 
-#define INFO_INIT\
-{NULL, NULL, NULL, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL,\ 0, 0, 0}
+int execute_commands(char *buff, char **cmds_list, char *cmd,int read, char *first_av);
 
-/**
- * strut builtin - contains a builtin string and realted functions
- * @type: the builtin command flag
- * @func: the function
- */
+/* Special functions */
+void __attribute__((constructor)) build_dynamic_environ(void);
+void __attribute__((destructor)) free_dynamic_environ(void);
 
-typedef struct builtin
-{
-	char *type;
-	int (*func)(info_t *);
-} builtin_table;
+char *_getenv(char *name);
+
+int *process_exit_code();
+void set_process_exit_code(int code);
+
+/* builtins */
+void env(void);
+int _setenv(char *name, char *value);
+int _unsetenv(char *name);
+int _help(char **commands);
+
+/* builtins utils */
+int validate_env_name(char *name);
+int is_valid_env_var_name(char *name);
+int get_env_index(char *name);
+/* functions that is part of help */
+int read_line(const int fd, char **line);
+int f_read_line(char **str, char **line, int fd);
+
+/* own implementations */
+char *_strtok(char *str, char *delimiter);
+int _getline(char **buffer, size_t *buf_size, FILE *stream);
+char *_strcpy(char *dest, char *src);
+char *_strncpy(char *dest, char *src, int n);
+
+/* Command handlers */
+int handle_PATH(char **commands);
+char *getpath(char *dir, char *filename);
+char **parse_user_input(char *str_input, char *delimiter);
+int count_args(char *str_input, char *delimiter);
+
+/* Memory management */
+void *allocate_memory(unsigned int bytes);
+char *duplicate_string(char *str);
+void free_dbl_ptr(char **dbl_ptr);
+void free_allocs(char *buff, char **cmds_list, char **commands, int flags);
+
+void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size);
+
+/* handle_builtins */
+int handle_builtins(char **commands);
+
+/* handle_enter */
+int handle_enter(char **commands);
+/* handle comments in input */
+char *handle_comment(char *str_input);
+
+/* Exit handlers */
+int handle_exit(char *buff, char **cmds_list, char **commands);
+int get_exit_status(char *buff);
+
+/* Error handlers */
+void dispatch_error(char *msg);
+void print_builtin_error(char *msg, char *arg);
+
+/* strings functions */
+int _strlen(const char *s);
+char *_strdup(const char *s1);
+char *_strchr(const char *s, int c);
+char *_strcat(char *s1, const char *s2);
+char *_strncat(char *s1, const char *s2, size_t n);
+char *num_to_str(int num);
+int _strncmp(const char *s1, const char *s2, size_t n);
+int _puts(char *str);
+
+/* f_strings_creations */
+char *f_strjoin(char const *s1, char const *s2);
+char *f_strsub(char const *s, unsigned int start, size_t len);
+void f_strdel(char **as);
+int _strcmp(const char *s1, const char *s2);
+
+#endif
