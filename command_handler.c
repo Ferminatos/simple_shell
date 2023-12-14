@@ -69,7 +69,9 @@ int count_args(char *str_input, char *delimiter)
 */
 int handle_PATH(char **commands)
 {
-	char *path_dirs;
+	char *path_dirs, *path;
+	char *tkn, *tkn_ptr;
+	char *str_copy;
 	int flag = 127;
 
 	if (
@@ -85,5 +87,75 @@ int handle_PATH(char **commands)
 	if (path_dirs == NULL)
 		return (127);
 
+	str_copy = duplicate_string(path_dirs);
+	tkn_ptr = str_copy;
+	while (1)
+	{
+		tkn = _strtok(tkn_ptr, ":");
+		if (tkn == NULL)
+			break;
+		tkn_ptr = NULL;
+		path = getpath(tkn, commands[0]);
+		if (access(path, F_OK) != -1)
+		{
+			free(commands[0]);
+			commands[0] = path;
+			flag = 0;
+			break;
+		}
+		free(path);
+	}
+	free(str_copy);
 	return (flag);
+}
+/**
+ * handle_comment - deletes a comment from the buffer
+ * @str_input: User's input
+ * Return: pointer to string
+ */
+
+char *handle_comment(char *str_input)
+{
+	char *without_comments = str_input;
+
+	if (*str_input == '#')
+	{
+		*str_input = '\n';
+		*(str_input + 1) = '\0';
+	}
+
+	while (str_input && *str_input)
+	{
+		if (*str_input == '#' && *(str_input - 1) == ' ')
+		{
+			*(str_input - 1) = '\n';
+			*str_input = '\0';
+			break;
+		}
+		str_input++;
+	}
+
+	return (without_comments);
+}
+
+/**
+ * getpath - Creates a string representing a full path to file
+ * @dir: String representing a directory path
+ * @filename: Name of the file we are looking for
+ *
+ * Return: String as a full path to "filename"
+*/
+char *getpath(char *dir, char *filename)
+{
+	int dir_len = _strlen(dir);
+	int filename_len = _strlen(filename);
+	char *path;
+
+	path = allocate_memory(sizeof(char *) * (dir_len + filename_len + 2));
+
+	_strcpy(path, dir);
+	_strcat(path, "/");
+	_strncat(path, filename, filename_len + 1);
+
+	return (path);
 }

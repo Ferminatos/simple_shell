@@ -1,7 +1,38 @@
 #include "shell.h"
 
+void handle_aliases(char **commands);
 void handle_cmd_not_found(char *buff, char **cmds_list, char **commands,
 	char *first_av);
+/**
+ * build_dynamic_environ - Builds the "env vars" array using dynamic memory
+ */
+
+void build_dynamic_environ(void)
+{
+	int count_envs = 0;
+	char **new_environ;
+
+	while (__environ[count_envs] != NULL)
+		count_envs++;
+
+	new_environ = allocate_memory(sizeof(char *) * (count_envs + 1));
+
+	for (count_envs = 0;  __environ[count_envs] != NULL; count_envs++)
+		new_environ[count_envs] = duplicate_string(__environ[count_envs]);
+
+	new_environ[count_envs] = NULL;
+	__environ = new_environ;
+}
+
+/**
+ * free_dynamic_environ - Frees the memory allocated to hold "env vars"
+ */
+
+void free_dynamic_environ(void)
+{
+	free_dbl_ptr(__environ);
+}
+
 /**
  * handle_enter - Check if no command was entered
  * @commands: String of commnands
@@ -33,6 +64,8 @@ int execute_commands(char *buff, char **cmds_list,
 	int child_pid, _err = 0, flag = 0, *status = process_exit_code();
 
 	commands = parse_user_input(cmd, " ");
+	handle_var_replacement(commands);
+	handle_aliases(commands);
 
 	if (handle_exit(buff, cmds_list, commands) == -1 ||
 			handle_enter(commands) == 1	||

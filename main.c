@@ -36,7 +36,9 @@ int main(int ac, char **av)
 			free(buff);
 			exit(*process_exit_code());
 		}
+		buff = handle_comment(buff);
 		_strtok(buff, "\n");
+		handling_semicolon_and_operators(buff, read, av[0]);
 	}
 	free(buff);
 	if (exec_file)
